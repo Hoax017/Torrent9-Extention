@@ -4,7 +4,7 @@
   "manifest_version": 2,
   "name": "Torrent9++",
   "version": "1.0",
-  "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/apply-css",
+  "homepage_url": "https://github.com/Hoax017/Torent9-Extention",
 
   "background": {
     "scripts": ["background.js"]
@@ -16,8 +16,38 @@
   },
 
   "permissions": [
+    "*://torrents9.pe/*",
+    "*://www.torrents9.pe/*",
     "activeTab",
-    "tabs"
+    "alarms",
+    "bookmarks",
+    "browsingData",
+    "browserSettings",
+    "contextMenus",
+    "contextualIdentities",
+    "cookies",
+    "downloads",
+    "downloads.open",
+    "find",
+    "geolocation",
+    "history",
+    "identity",
+    "idle",
+    "management",
+    "menus",
+    "nativeMessaging",
+    "notifications",
+    "pkcs11",
+    "privacy",
+    "proxy",
+    "sessions",
+    "storage",
+    "tabs",
+    "theme",
+    "topSites",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking"
   ]
 
 }

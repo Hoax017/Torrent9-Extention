@@ -1,69 +1,89 @@
-const CSS = "body { border: 20px solid red; }";
-const TITLE_APPLY = "Apply CSS";
-const TITLE_REMOVE = "Remove CSS";
-const APPLICABLE_PROTOCOLS = ["http:", "https:"];
+const APPLICABLE_URLS = ["http://www.torrents9.pe"];
+const TITLE_APPLY = "Activer Torrent9++";
+const TITLE_REMOVE = "Desactiver Torrent9++";
 
-/*
-Toggle CSS: based on the current title, insert or remove the CSS.
-Update the page action's title and icon to reflect its state.
-*/
-function toggleCSS(tab) {
-
-  function gotTitle(title) {
-    if (title === TITLE_APPLY) {
-      browser.pageAction.setIcon({tabId: tab.id, path: "icons/on.svg"});
-      browser.pageAction.setTitle({tabId: tab.id, title: TITLE_REMOVE});
-      browser.tabs.insertCSS({code: CSS});
-    } else {
-      browser.pageAction.setIcon({tabId: tab.id, path: "icons/off.svg"});
-      browser.pageAction.setTitle({tabId: tab.id, title: TITLE_APPLY});
-      browser.tabs.removeCSS({code: CSS});
-    }
-  }
-
-  var gettingTitle = browser.pageAction.getTitle({tabId: tab.id});
-  gettingTitle.then(gotTitle);
-}
-
-/*
-Returns true only if the URL's protocol is in APPLICABLE_PROTOCOLS.
-*/
 function protocolIsApplicable(url) {
-  var anchor =  document.createElement('a');
-  anchor.href = url;
-  return APPLICABLE_PROTOCOLS.includes(anchor.protocol);
+	var anchor =  document.createElement('a');
+	anchor.href = url;
+	return APPLICABLE_URLS.includes(anchor.origin);
 }
 
-/*
-Initialize the page action: set icon and title, then show.
-Only operates on tabs whose URL's protocol is applicable.
-*/
-function initializePageAction(tab) {
-  if (protocolIsApplicable(tab.url)) {
-    browser.pageAction.setIcon({tabId: tab.id, path: "icons/off.svg"});
-    browser.pageAction.setTitle({tabId: tab.id, title: TITLE_APPLY});
-    browser.pageAction.show(tab.id);
-  }
+function initializePageAction(tab){
+	if (protocolIsApplicable(tab.url)) {
+
+		function gotTitle(title) {
+			if (title == TITLE_REMOVE)
+			{
+				browser.pageAction.setIcon({tabId: tab.id, path: "icons/off.svg"});
+				browser.pageAction.setTitle({tabId: tab.id, title: TITLE_APPLY});
+			}
+			else
+			{
+				browser.pageAction.setIcon({tabId: tab.id, path: "icons/on.svg"});
+				browser.pageAction.setTitle({tabId: tab.id, title: TITLE_REMOVE});
+				browser.tabs.executeScript(
+					tab.id,
+					{
+						file: "tab_script.js"
+					}
+				);
+			}
+		}
+
+		var AD_TORRENT9PlusPlus = localStorage.getItem("AD_TORRENT9PlusPlus")
+		if (AD_TORRENT9PlusPlus == "false")
+			browser.pageAction.setTitle({tabId: tab.id, title: TITLE_REMOVE});
+		else
+			browser.pageAction.setTitle({tabId: tab.id, title: TITLE_APPLY});
+
+		browser.pageAction.show(tab.id);
+
+		var gettingTitle = browser.pageAction.getTitle({tabId: tab.id});
+		gettingTitle.then(gotTitle);
+	}
 }
 
-/*
-When first loaded, initialize the page action for all tabs.
-*/
 var gettingAllTabs = browser.tabs.query({});
 gettingAllTabs.then((tabs) => {
-  for (let tab of tabs) {
-    initializePageAction(tab);
-  }
+	for (let tab of tabs) {
+		initializePageAction(tab);
+	}
 });
 
-/*
-Each time a tab is updated, reset the page action for that tab.
-*/
 browser.tabs.onUpdated.addListener((id, changeInfo, tab) => {
-  initializePageAction(tab);
+	initializePageAction(tab);
 });
 
-/*
-Toggle CSS when the page action is clicked.
-*/
-browser.pageAction.onClicked.addListener(toggleCSS);
+
+browser.pageAction.onClicked.addListener(function(tab){
+	function gotTitle2(title) {
+		if (title == TITLE_APPLY)
+		{
+			localStorage.setItem("AD_TORRENT9PlusPlus", true);
+			browser.pageAction.setIcon({tabId: tab.id, path: "icons/on.svg"});
+			browser.pageAction.setTitle({tabId: tab.id, title: TITLE_REMOVE});
+			browser.tabs.executeScript(
+				tab.id,
+				{
+					file: "tab_script.js"
+				}
+			);
+		}
+		else
+		{
+			browser.tabs.executeScript(
+				tab.id,
+				{
+					code: "window.location.reload(true);"
+				}
+			);
+			localStorage.setItem("AD_TORRENT9PlusPlus", false);
+			browser.pageAction.setTitle({tabId: tab.id, title: TITLE_APPLY});
+			browser.pageAction.setIcon({tabId: tab.id, path: "icons/off.svg"});
+		}
+	}
+
+
+	var gettingTitle = browser.pageAction.getTitle({tabId: tab.id});
+		gettingTitle.then(gotTitle2);
+});
