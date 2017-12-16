@@ -9,7 +9,6 @@ var index = 0;
 var modal_save_change = 0;
 var colorstat;
 var allTorrentLink = [];
-var perpage = 50;
 
 var base_link = '/get_torrent/';
 var base_img = '/_pictures/';
@@ -154,7 +153,32 @@ $(document).ready(function() {
 	if (option.enable_pics) {
 		$("<style type='text/css'>.table-bordered.cust-table > tbody > tr > td:nth-child(3) {color: #000;}.table-bordered.cust-table > tbody > tr > td:nth-child(4) {color: #008f0d;}.table-bordered.cust-table > tbody > tr > td:nth-child(5) {color: #b94309;}.table-bordered.cust-table > tbody > tr > td:nth-child(2) { text-align: left;}</style>").appendTo("head");
 	}
-	$('tr').each(function (){
+	if ($("thead").length === 0) {
+		$('tbody').each(function (){
+			var thead = '<thead><tr>';
+			if(option.enable_pics)
+				thead +='<th class="col-md-1">Image</th>';
+			thead +='<th class="">Nom du torrent</th>';
+			thead +='<th style="width:90px">Taille</th>';
+			thead +='<th style="width:100px">Seed</th>';
+			thead +='<th style="width:100px">Leech</th>';
+			if(option.enable_direct_download)
+				thead +='<th class="col-md-1" style="white-space: nowrap;"><a href="#" id="AD_download_all_link" style="/*! font-size: 12px; */">Download All</a></th>';
+			thead +='</tr></thead>';
+			$(this).parent().prepend(thead)
+		});
+	}
+	else
+	{
+		$('thead > tr').each(function (){
+			var trow = $(this);
+			if(option.enable_direct_download)
+				trow.append('<th class="col-md-1" style="white-space: nowrap;"><a href="#" id="AD_download_all_link" style="/*! font-size: 12px; */">Download All</a></th>');
+			if(option.enable_pics)
+				trow.prepend('<th class="col-md-1">Image</th>');
+		});
+	}
+	$('tbody > tr').each(function (){
 		var trow = $(this);
 		var Current_Link = trow.find('td').first().find('a');
 		trow.find('td').each(function (){
@@ -210,25 +234,14 @@ $(document).ready(function() {
 
 		}
 
-
-
-		if(index % (perpage + 1) === 0)
+		if(option.enable_pics)
 		{
-			if(option.enable_direct_download)
-				trow.append('<th class="col-md-1" style="white-space: nowrap;"><a href="#" id="AD_download_all_link" style="/*! font-size: 12px; */">Download All</a></th>');
-			if(option.enable_pics)
-				trow.prepend('<th class="col-md-1">Image</th>');
+			trow.prepend('<td><a href="'+Current_Link.attr('href')+'" target="_blank"><img title="Download" src="'+img_link+'" style="width: 150px;"></a></td>');
+			added_style = "height: 50px; line-height: 50px; ";
 		}
-		else
-		{
-			if(option.enable_pics)
-			{
-				trow.prepend('<td><a href="'+Current_Link.attr('href')+'" target="_blank"><img title="Download" src="'+img_link+'" style="width: 150px;"></a></td>');
-				added_style = "height: 50px; line-height: 50px; ";
-			}
-			if(option.enable_direct_download)
-				trow.append('<td style="white-space: nowrap;'+ added_style +'"><a title="Download" href="'+lien+'" style="color:#000; font-size:12px; font-weight:bold;">Download</a></td>');
-		}
+		if(option.enable_direct_download)
+			trow.append('<td style="white-space: nowrap;'+ added_style +'"><a title="Download" href="'+lien+'" style="color:#000; font-size:12px; font-weight:bold;">Download</a></td>');
+
 		index++;
 	});
 
@@ -251,14 +264,15 @@ $(document).ready(function() {
 
 	$("body").on('click', '#AD_download_all_link', function(event) {
 		event.preventDefault();
-		var myVar = setInterval(function(){ myTimer(); }, 500);
-		var i = allTorrentLink.length;
+		var myVar = setInterval(function(){ myTimer(); }, 1000);
+		var i = 0;
 		function myTimer() {
-			i--;
-			window.location = window.location.origin+allTorrentLink[i];
-			if (i == 0) {
+			if (i == allTorrentLink.length) {
 				clearInterval(myVar);
+				return;
 			}
+			window.location = window.location.origin+allTorrentLink[i];
+			i++;
 		}
 	});
 
